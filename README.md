@@ -1,4 +1,4 @@
-# Projeto de Estudo: Microsserviços com Spring Boot e Spring Cloud
+# Projeto de Estudo: Microserviços com Spring Boot e Spring Cloud
 
 Este projeto é um ambiente de estudo para a construção de uma arquitetura de microsserviços utilizando o ecossistema Spring.
 
