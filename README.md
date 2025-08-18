@@ -2,13 +2,14 @@
 
 Este projeto é um ambiente de estudo para a construção de uma arquitetura de microsserviços utilizando o ecossistema Spring.
 
-Atualmente, a estrutura é composta por um serviço central que desempenha os papéis de **Config Server** e **Eureka Server (Service Discovery)**, além de um repositório de configuração versionado com Git.
+Atualmente, a estrutura é composta por um serviço central que desempenha os papéis de **Config Server** e **Eureka Server (Service Discovery)**, um microsserviço de exemplo (`service-one`) e um repositório de configuração versionado com Git.
 
 ## Estrutura do Projeto
 
 - **/service-main**: Aplicação Spring Boot que atua como o coração da infraestrutura dos microsserviços.
   - **Spring Cloud Config Server**: Centraliza a configuração de todas as aplicações.
   - **Spring Cloud Netflix Eureka**: Atua como um servidor de registro e descoberta de serviços, permitindo que os microsserviços se encontrem dinamicamente na rede.
+- **/service-one**: Um microsserviço Spring Boot que consome a configuração do Config Server e se registra no Eureka Server.
 - **/config-server**: Um diretório que espelha a estrutura de um repositório Git contendo os arquivos de configuração para os microsserviços.
 
 ---
@@ -27,6 +28,7 @@ As dependências-chave que habilitam as funcionalidades deste serviço são:
 
 - `spring-cloud-config-server`: Transforma a aplicação em um **Config Server**.
 - `spring-cloud-starter-netflix-eureka-server`: Transforma a aplicação em um **Eureka Server**.
+- `org.projectlombok:lombok`: (Adicionado) Utilitário para reduzir código boilerplate.
 
 #### `src/main/resources/application.properties`
 
@@ -48,6 +50,9 @@ spring.cloud.config.server.git.clone-on-start=true
 # Subdiretório dentro do repositório onde os arquivos de configuração estão localizados
 spring.cloud.config.server.git.search-paths=config
 
+# (Adicionado) Prefixo para os endpoints do Config Server
+spring.cloud.config.server.prefix=/config
+
 # --- Configuração do Eureka Server ---
 
 # Desabilita o registro do próprio servidor Eureka com ele mesmo
@@ -58,18 +63,45 @@ eureka.client.fetchRegistry=false
 
 # Hostname para o servidor Eureka
 eureka.instance.hostname=localhost
-
-# Desabilita o modo de auto-preservação (útil em ambientes de desenvolvimento)
-eureka.server.enableSelfPreservation=false
 ```
 
-### 2. Repositório de Configuração (`config-server`)
+### 2. Service One (`service-one`)
 
-Este diretório contém os arquivos `.properties` que serão fornecidos aos microsserviços pelo **Config Server**. O nome do arquivo corresponde ao `spring.application.name` do microsserviço cliente.
+Este é um microsserviço que demonstra como um cliente pode interagir com o Config Server e o Eureka Server.
+
+#### `pom.xml`
+
+As dependências-chave que habilitam as funcionalidades deste serviço são:
+
+- `spring-boot-starter-web`: Para criar endpoints REST.
+- `spring-cloud-starter-config`: Para se conectar ao **Config Server**.
+- `spring-cloud-starter-netflix-eureka-client`: Para se registrar no **Eureka Server**.
+
+#### `src/main/java/com/glaulher/service_one/HelloWorldController.java`
+
+Este controller expõe um endpoint `/message` que retorna uma mensagem obtida do Config Server.
+
+```java
+@RestController
+public class HelloWorldController {
+
+  @Value("${message:Hellow default}")
+  private String message;
+
+  @GetMapping("/message")
+  public String getMessage() {
+    return this.message;
+  }
+}
+```
+
+### 3. Repositório de Configuração (`config-server`)
+
+Este diretório contém os arquivos `.properties` que serão fornecidos aos microsserviços pelo **Config Server**.
 
 #### `service-one.properties`
 
-Este arquivo contém a configuração para um futuro microsserviço chamado `service-one`.
+Este arquivo contém a configuração para o microsserviço `service-one`.
 
 ```properties
 # Uma propriedade customizada que será injetada no microsserviço
@@ -79,3 +111,11 @@ message=Hello from GitHub Config Service
 server.port=8081
 ```
 
+---
+
+## Aprendizados até aqui
+
+- **Config Server**: Foi configurado um servidor de configuração centralizado usando o Spring Cloud Config. Ele serve as configurações de um repositório Git, permitindo que os microsserviços obtenham suas configurações de uma fonte centralizada e versionada.
+- **Eureka Server**: Foi configurado um servidor de descoberta de serviços usando o Spring Cloud Netflix Eureka. Isso permite que os microsserviços se registrem e descubram uns aos outros dinamicamente na rede.
+- **Cliente de Configuração e Eureka**: O `service-one` demonstra como um microsserviço pode atuar como um cliente tanto do Config Server quanto do Eureka Server. Ele busca suas configurações no Config Server e se registra no Eureka, tornando-se detectável por outros serviços.
+- **Injeção de Propriedades**: Foi utilizado a anotação `@Value` para injetar propriedades de configuração do Config Server diretamente em um bean do Spring.
