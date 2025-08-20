@@ -1,4 +1,4 @@
-package com.glaulher.service_one;
+package com.glaulher.service_tasks;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;

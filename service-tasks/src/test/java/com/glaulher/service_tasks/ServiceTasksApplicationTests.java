@@ -1,13 +1,11 @@
-package com.glaulher.service_one;
+package com.glaulher.service_tasks;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ServiceOneApplicationTests {
+class ServiceTasksApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+  @Test
+  void contextLoads() {}
 }
